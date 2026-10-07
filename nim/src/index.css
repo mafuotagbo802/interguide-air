@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-colour: #000300
+}
+
+@keyframes popText {
+    0% {
+        opacity: 0;
+        transform: scale(0.7) translateY(40px);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(1.08) translateY(-5px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.logo-slide {
+  animation: logoSlide 8s ease-in-out infinite alternate;
+}
+
+@keyframes logoSlide {
+  0% {
+    transform: translateX(-250px);
+  }
+
+  100% {
+    transform: translateX(250px);
+  }
+}
