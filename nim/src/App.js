@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate, Outlet } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -26,6 +26,21 @@ import HomeManagement from "./Admin/HomeManagement";
 import AdminFlightManagement from "./Admin/AdminFlightManagement";
 import AdminHotelReservation from "./Admin/AdminHotelReservation";
 import AdminTourPackageManagement from "./Admin/AdminTourPackageManagement";
+
+
+/* =========================
+    PROTECTED ADMIN ROUTE
+========================= */
+
+const AdminRoute = () => {
+  const token = localStorage.getItem("adminToken");
+
+  if (!token) {
+    return <Navigate to="/Admin" replace />;
+  }
+
+  return <Outlet />;
+};
 
 
 function App() {
@@ -109,10 +124,6 @@ function App() {
           element={<ForgotPassword />}
         />
 
-        {/* IMPORTANT:
-            This path must match the
-            reset link in the email.
-        */}
         <Route
           path="/Admin/reset-password"
           element={<ResetPassword />}
@@ -120,35 +131,40 @@ function App() {
 
 
         {/* =========================
-            ADMIN PAGES
+            PROTECTED ADMIN PAGES
         ========================== */}
 
-        <Route element={<AdminLayout />}>
+        <Route element={<AdminRoute />}>
 
-          <Route
-            path="/Admin/dashboard"
-            element={<AdminDashboard />}
-          />
+          <Route element={<AdminLayout />}>
 
-          <Route
-            path="/Admin/home"
-            element={<HomeManagement />}
-          />
+            <Route
+              path="/Admin/dashboard"
+              element={<AdminDashboard />}
+            />
 
-          <Route
-            path="/Admin/flight"
-            element={<AdminFlightManagement />}
-          />
+            <Route
+              path="/Admin/home"
+              element={<HomeManagement />}
+            />
 
-          <Route
-            path="/Admin/hotel"
-            element={<AdminHotelReservation />}
-          />
+            <Route
+              path="/Admin/flight"
+              element={<AdminFlightManagement />}
+            />
 
-          <Route 
-            path="/Admin/tour-packages" 
-            element={<AdminTourPackageManagement />} 
-          />
+            <Route
+              path="/Admin/hotel"
+              element={<AdminHotelReservation />}
+            />
+
+            <Route
+              path="/Admin/tour-packages"
+              element={<AdminTourPackageManagement />}
+            />
+
+          </Route>
+
         </Route>
 
       </Routes>
@@ -172,4 +188,3 @@ function App() {
 }
 
 export default App;
-
