@@ -121,15 +121,6 @@ const adminSchema =
             required: true
         },
 
-        role: {
-            type: String,
-            enum: [
-                "superadmin",
-                "admin"
-            ],
-            default: "admin"
-        },
-
         resetPasswordToken: {
             type: String,
             default: null
@@ -482,63 +473,121 @@ const TourPackage =
 // =====================================================
 // NODEMAILER
 // =====================================================
+
 let transporter = null;
 
 try {
-    transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: parseInt(process.env.EMAIL_PORT),
-        secure: false,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASSWORD
-        },
-        requireTLS: true
-    });
+
+    transporter =
+        nodemailer.createTransport({
+
+            host:
+                process.env.EMAIL_HOST,
+
+            port:
+                parseInt(
+                    process.env.EMAIL_PORT
+                ),
+
+            secure:
+                false,
+
+            auth: {
+
+                user:
+                    process.env.EMAIL_USER,
+
+                pass:
+                    process.env.EMAIL_PASSWORD
+            },
+
+            requireTLS:
+                true
+        });
 
     transporter.verify((error) => {
+
         if (error) {
-            console.error("❌ SMTP connection error:", error);
+
+            console.error(
+                "❌ SMTP connection error:",
+                error
+            );
+
         } else {
-            console.log("✅ SMTP server is ready to send emails");
+
+            console.log(
+                "✅ SMTP server is ready to send emails"
+            );
+
         }
+
     });
+
 } catch (error) {
-    console.error("❌ Failed to create transporter:", error);
+
+    console.error(
+        "❌ Failed to create transporter:",
+        error
+    );
+
 }
 
 // =====================================================
 // TEST EMAIL
 // =====================================================
 
-app.get("/test-email", async (req, res) => {
-    try {
+app.get(
+    "/test-email",
+    async (req, res) => {
 
-        await transporter.sendMail({
+        try {
 
-            from: process.env.EMAIL_USER,
+            await transporter.sendMail({
 
-            to: process.env.COMPANY_EMAIL,
+                from:
+                    process.env.EMAIL_USER,
 
-            subject: "InterGuide Air - Test Email",
+                to:
+                    process.env.COMPANY_EMAIL,
 
-            text: "This is a test email from the InterGuide Air backend."
-        });
+                subject:
+                    "InterGuide Air - Test Email",
 
-        res.json({
-            message: "Test email sent successfully"
-        });
+                text:
+                    "This is a test email from the InterGuide Air backend."
 
-    } catch (error) {
+            });
 
-        console.error("Test email error:", error);
+            res.json({
 
-        res.status(500).json({
-            message: "Test email failed",
-            error: error.message
-        });
+                message:
+                    "Test email sent successfully"
+
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Test email error:",
+                error
+            );
+
+            res.status(500).json({
+
+                message:
+                    "Test email failed",
+
+                error:
+                    error.message
+
+            });
+
+        }
+
     }
-});
+);
+
 // =====================================================
 // JWT AUTHENTICATION
 // =====================================================
@@ -559,9 +608,12 @@ const authenticateAdmin =
             ) {
 
                 return res.status(401).json({
+
                     message:
                         "Authentication required"
+
                 });
+
             }
 
             const token =
@@ -573,6 +625,29 @@ const authenticateAdmin =
                     process.env.JWT_SECRET
                 );
 
+            // Make sure the token belongs to
+            // the only approved Admin email
+
+            const allowedEmail =
+                process.env.ADMIN_ALLOWED_EMAIL
+                    ?.toLowerCase()
+                    .trim();
+
+            if (
+                !allowedEmail ||
+                decoded.email?.toLowerCase().trim() !==
+                    allowedEmail
+            ) {
+
+                return res.status(403).json({
+
+                    message:
+                        "Admin access denied"
+
+                });
+
+            }
+
             req.admin =
                 decoded;
 
@@ -581,39 +656,14 @@ const authenticateAdmin =
         } catch (error) {
 
             return res.status(401).json({
+
                 message:
                     "Invalid or expired token"
+
             });
-        }
-    };
 
-// =====================================================
-// SUPER ADMIN AUTHORIZATION
-// =====================================================
-
-const requireSuperAdmin =
-    (req, res, next) => {
-
-        if (!req.admin) {
-
-            return res.status(401).json({
-                message:
-                    "Authentication required"
-            });
         }
 
-        if (
-            req.admin.role !==
-            "superadmin"
-        ) {
-
-            return res.status(403).json({
-                message:
-                    "Super Admin permission required"
-            });
-        }
-
-        next();
     };
 
 // =====================================================
@@ -639,9 +689,12 @@ app.post(
             ) {
 
                 return res.status(400).json({
+
                     message:
                         "Please fill in all fields"
+
                 });
+
             }
 
             if (
@@ -649,9 +702,12 @@ app.post(
             ) {
 
                 return res.status(400).json({
+
                     message:
                         "Password must be at least 6 characters"
+
                 });
+
             }
 
             const cleanEmail =
@@ -659,29 +715,46 @@ app.post(
                     .toLowerCase()
                     .trim();
 
+            const allowedEmail =
+                process.env.ADMIN_ALLOWED_EMAIL
+                    ?.toLowerCase()
+                    .trim();
+
+            // =================================================
+            // ONLY THE APPROVED EMAIL CAN SIGN UP
+            // =================================================
+
+            if (
+                !allowedEmail ||
+                cleanEmail !== allowedEmail
+            ) {
+
+                return res.status(403).json({
+
+                    message:
+                        "This email is not authorized to create an Admin account."
+
+                });
+
+            }
+
             const existingAdmin =
                 await Admin.findOne({
+
                     email:
                         cleanEmail
+
                 });
 
             if (existingAdmin) {
 
                 return res.status(400).json({
+
                     message:
-                        "An admin with this email already exists"
+                        "An Admin account with this email already exists"
+
                 });
-            }
 
-            const adminCount =
-                await Admin.countDocuments();
-
-            if (adminCount > 0) {
-
-                return res.status(403).json({
-                    message:
-                        "Public admin signup is disabled. Only the Super Admin can create new admin accounts."
-                });
             }
 
             const hashedPassword =
@@ -699,17 +772,17 @@ app.post(
                         cleanEmail,
 
                     password:
-                        hashedPassword,
+                        hashedPassword
 
-                    role:
-                        "superadmin"
                 });
 
             await admin.save();
 
             res.status(201).json({
+
                 message:
-                    "Super Admin account created successfully"
+                    "Admin account created successfully"
+
             });
 
         } catch (error) {
@@ -720,109 +793,17 @@ app.post(
             );
 
             res.status(500).json({
+
                 message:
-                    "Error creating admin account",
+                    "Error creating Admin account",
 
                 error:
                     error.message
+
             });
+
         }
-    }
-);
 
-// =====================================================
-// ONE-TIME SUPER ADMIN SETUP
-// =====================================================
-
-app.post(
-    "/admin/setup-superadmin",
-    async (req, res) => {
-
-        try {
-
-            const {
-                email,
-                setupKey
-            } = req.body;
-
-            if (
-                !email ||
-                !setupKey
-            ) {
-
-                return res.status(400).json({
-                    message:
-                        "Email and setup key are required"
-                });
-            }
-
-            if (
-                setupKey !==
-                process.env.SUPER_ADMIN_SETUP_KEY
-            ) {
-
-                return res.status(403).json({
-                    message:
-                        "Invalid setup key"
-                });
-            }
-
-            const existingSuperAdmin =
-                await Admin.findOne({
-                    role:
-                        "superadmin"
-                });
-
-            if (existingSuperAdmin) {
-
-                return res.status(403).json({
-                    message:
-                        "A Super Admin already exists"
-                });
-            }
-
-            const admin =
-                await Admin.findOne({
-
-                    email:
-                        email
-                            .toLowerCase()
-                            .trim()
-                });
-
-            if (!admin) {
-
-                return res.status(404).json({
-                    message:
-                        "Admin account with this email was not found"
-                });
-            }
-
-            admin.role =
-                "superadmin";
-
-            await admin.save();
-
-            res.json({
-                message:
-                    "Admin account has been promoted to Super Admin successfully"
-            });
-
-        } catch (error) {
-
-            console.error(
-                "Super Admin setup error:",
-                error
-            );
-
-            res.status(500).json({
-                message:
-                    "Error setting up Super Admin",
-
-                error:
-                    error.message
-            });
-        }
     }
 );
 
@@ -847,50 +828,86 @@ app.post(
             ) {
 
                 return res.status(400).json({
+
                     message:
                         "Please enter your email and password correctly"
+
                 });
+
+            }
+
+            const cleanEmail =
+                email
+                    .toLowerCase()
+                    .trim();
+
+            const allowedEmail =
+                process.env.ADMIN_ALLOWED_EMAIL
+                    ?.toLowerCase()
+                    .trim();
+
+            // =================================================
+            // ONLY THE APPROVED EMAIL CAN LOGIN
+            // =================================================
+
+            if (
+                !allowedEmail ||
+                cleanEmail !== allowedEmail
+            ) {
+
+                return res.status(401).json({
+
+                    message:
+                        "Invalid email or password"
+
+                });
+
             }
 
             const admin =
                 await Admin.findOne({
 
                     email:
-                        email
-                            .toLowerCase()
-                            .trim()
+                        cleanEmail
+
                 });
 
             if (!admin) {
 
                 return res.status(401).json({
+
                     message:
                         "Invalid email or password"
+
                 });
+
             }
 
             const passwordMatch =
                 await bcrypt.compare(
+
                     password,
+
                     admin.password
+
                 );
 
             if (!passwordMatch) {
 
                 return res.status(401).json({
+
                     message:
                         "Invalid email or password"
-                });
-            }
 
-            const adminRole =
-                admin.role ||
-                "admin";
+                });
+
+            }
 
             const token =
                 jwt.sign(
 
                     {
+
                         id:
                             admin._id,
 
@@ -898,18 +915,19 @@ app.post(
                             admin.email,
 
                         fullName:
-                            admin.fullName,
+                            admin.fullName
 
-                        role:
-                            adminRole
                     },
 
                     process.env.JWT_SECRET,
 
                     {
+
                         expiresIn:
                             "1d"
+
                     }
+
                 );
 
             res.json({
@@ -928,11 +946,10 @@ app.post(
                         admin.fullName,
 
                     email:
-                        admin.email,
+                        admin.email
 
-                    role:
-                        adminRole
                 }
+
             });
 
         } catch (error) {
@@ -943,13 +960,17 @@ app.post(
             );
 
             res.status(500).json({
+
                 message:
                     "Error logging in",
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -970,9 +991,12 @@ app.post(
             if (!email) {
 
                 return res.status(400).json({
+
                     message:
                         "Please enter your email address"
+
                 });
+
             }
 
             const cleanEmail =
@@ -980,28 +1004,59 @@ app.post(
                     .toLowerCase()
                     .trim();
 
+            const allowedEmail =
+                process.env.ADMIN_ALLOWED_EMAIL
+                    ?.toLowerCase()
+                    .trim();
+
+            // =================================================
+            // ONLY THE APPROVED EMAIL CAN RESET PASSWORD
+            // =================================================
+
+            if (
+                !allowedEmail ||
+                cleanEmail !== allowedEmail
+            ) {
+
+                return res.json({
+
+                    message:
+                        "If an account exists with this email, a password reset link has been sent."
+
+                });
+
+            }
+
             const admin =
                 await Admin.findOne({
+
                     email:
                         cleanEmail
+
                 });
 
             // Do not reveal whether email exists
+
             if (!admin) {
 
                 return res.json({
+
                     message:
                         "If an account exists with this email, a password reset link has been sent."
+
                 });
+
             }
 
             // Generate secure reset token
+
             const resetToken =
                 crypto
                     .randomBytes(32)
                     .toString("hex");
 
             // Hash token before saving
+
             const hashedToken =
                 crypto
                     .createHash("sha256")
@@ -1012,6 +1067,7 @@ app.post(
                 hashedToken;
 
             // Token expires after 15 minutes
+
             admin.resetPasswordExpires =
                 Date.now() +
                 15 * 60 * 1000;
@@ -1019,10 +1075,12 @@ app.post(
             await admin.save();
 
             // Frontend reset page
+
             const resetLink =
                 `http://localhost:3000/Admin/reset-password?token=${resetToken}`;
 
             // Send reset email
+
             await transporter.sendMail({
 
                 from:
@@ -1116,8 +1174,10 @@ app.post(
             });
 
             res.json({
+
                 message:
                     "If an account exists with this email, a password reset link has been sent."
+
             });
 
         } catch (error) {
@@ -1134,8 +1194,11 @@ app.post(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -1160,9 +1223,12 @@ app.post(
             ) {
 
                 return res.status(400).json({
+
                     message:
                         "Reset token and new password are required"
+
                 });
+
             }
 
             if (
@@ -1170,12 +1236,16 @@ app.post(
             ) {
 
                 return res.status(400).json({
+
                     message:
                         "Password must be at least 6 characters"
+
                 });
+
             }
 
             // Hash token received from frontend
+
             const hashedToken =
                 crypto
                     .createHash("sha256")
@@ -1189,20 +1259,51 @@ app.post(
                         hashedToken,
 
                     resetPasswordExpires: {
+
                         $gt:
                             Date.now()
+
                     }
+
                 });
 
             if (!admin) {
 
                 return res.status(400).json({
+
                     message:
                         "Password reset link is invalid or has expired"
+
                 });
+
+            }
+
+            // Make sure reset belongs to
+            // the approved Admin email
+
+            const allowedEmail =
+                process.env.ADMIN_ALLOWED_EMAIL
+                    ?.toLowerCase()
+                    .trim();
+
+            if (
+                !allowedEmail ||
+                admin.email
+                    .toLowerCase()
+                    .trim() !== allowedEmail
+            ) {
+
+                return res.status(403).json({
+
+                    message:
+                        "Password reset is not authorized"
+
+                });
+
             }
 
             // Hash new password
+
             const hashedPassword =
                 await bcrypt.hash(
                     password,
@@ -1213,6 +1314,7 @@ app.post(
                 hashedPassword;
 
             // Clear reset token
+
             admin.resetPasswordToken =
                 null;
 
@@ -1222,8 +1324,10 @@ app.post(
             await admin.save();
 
             res.json({
+
                 message:
                     "Password reset successfully. You can now log in with your new password."
+
             });
 
         } catch (error) {
@@ -1240,8 +1344,11 @@ app.post(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -1264,9 +1371,33 @@ app.get(
             if (!admin) {
 
                 return res.status(404).json({
+
                     message:
                         "Admin not found"
+
                 });
+
+            }
+
+            const allowedEmail =
+                process.env.ADMIN_ALLOWED_EMAIL
+                    ?.toLowerCase()
+                    .trim();
+
+            if (
+                !allowedEmail ||
+                admin.email
+                    .toLowerCase()
+                    .trim() !== allowedEmail
+            ) {
+
+                return res.status(403).json({
+
+                    message:
+                        "Admin access denied"
+
+                });
+
             }
 
             res.json(admin);
@@ -1280,225 +1411,11 @@ app.get(
 
                 error:
                     error.message
+
             });
+
         }
-    }
-);
 
-// =====================================================
-// SUPER ADMIN - CREATE ADMIN
-// =====================================================
-
-app.post(
-    "/admin/create",
-    authenticateAdmin,
-    requireSuperAdmin,
-    async (req, res) => {
-
-        try {
-
-            const {
-                fullName,
-                email,
-                password
-            } = req.body;
-
-            if (
-                !fullName ||
-                !email ||
-                !password
-            ) {
-
-                return res.status(400).json({
-                    message:
-                        "Please fill in all fields"
-                });
-            }
-
-            if (
-                password.length < 6
-            ) {
-
-                return res.status(400).json({
-                    message:
-                        "Password must be at least 6 characters"
-                });
-            }
-
-            const cleanEmail =
-                email
-                    .toLowerCase()
-                    .trim();
-
-            const existingAdmin =
-                await Admin.findOne({
-                    email:
-                        cleanEmail
-                });
-
-            if (existingAdmin) {
-
-                return res.status(400).json({
-                    message:
-                        "An admin with this email already exists"
-                });
-            }
-
-            const hashedPassword =
-                await bcrypt.hash(
-                    password,
-                    10
-                );
-
-            const newAdmin =
-                new Admin({
-
-                    fullName,
-
-                    email:
-                        cleanEmail,
-
-                    password:
-                        hashedPassword,
-
-                    role:
-                        "admin"
-                });
-
-            await newAdmin.save();
-
-            res.status(201).json({
-
-                message:
-                    "Admin account created successfully",
-
-                admin: {
-
-                    id:
-                        newAdmin._id,
-
-                    fullName:
-                        newAdmin.fullName,
-
-                    email:
-                        newAdmin.email,
-
-                    role:
-                        newAdmin.role
-                }
-            });
-
-        } catch (error) {
-
-            console.error(
-                "Create admin error:",
-                error
-            );
-
-            res.status(500).json({
-
-                message:
-                    "Error creating admin account",
-
-                error:
-                    error.message
-            });
-        }
-    }
-);
-
-// =====================================================
-// SUPER ADMIN - GET ALL ADMINS
-// =====================================================
-
-app.get(
-    "/admin/all",
-    authenticateAdmin,
-    requireSuperAdmin,
-    async (req, res) => {
-
-        try {
-
-            const admins =
-                await Admin.find()
-                    .select("-password")
-                    .sort({
-                        createdAt:
-                            -1
-                    });
-
-            res.json(admins);
-
-        } catch (error) {
-
-            res.status(500).json({
-
-                message:
-                    "Error getting admins",
-
-                error:
-                    error.message
-            });
-        }
-    }
-);
-
-// =====================================================
-// SUPER ADMIN - DELETE ADMIN
-// =====================================================
-
-app.delete(
-    "/admin/:id",
-    authenticateAdmin,
-    requireSuperAdmin,
-    async (req, res) => {
-
-        try {
-
-            const admin =
-                await Admin.findById(
-                    req.params.id
-                );
-
-            if (!admin) {
-
-                return res.status(404).json({
-                    message:
-                        "Admin not found"
-                });
-            }
-
-            if (
-                admin.role ===
-                "superadmin"
-            ) {
-
-                return res.status(403).json({
-                    message:
-                        "The Super Admin cannot be deleted"
-                });
-            }
-
-            await Admin.findByIdAndDelete(
-                req.params.id
-            );
-
-            res.json({
-                message:
-                    "Admin deleted successfully"
-            });
-
-        } catch (error) {
-
-            res.status(500).json({
-
-                message:
-                    "Error deleting admin",
-
-                error:
-                    error.message
-            });
-        }
     }
 );
 
@@ -1506,166 +1423,254 @@ app.delete(
 // CONTACT FORM
 // =====================================================
 
-app.post("/contact", async (req, res) => {
-    try {
-        console.log("📩 Contact form received");
+app.post(
+    "/contact",
+    async (req, res) => {
 
-        const {
-            firstName,
-            lastName,
-            Email,
-            Telephone,
-            message
-        } = req.body;
+        try {
 
-        const fullName =
-            `${firstName || ""} ${lastName || ""}`.trim();
+            console.log(
+                "📩 Contact form received"
+            );
 
-        const cleanEmail =
-            Email
-                ? Email.trim().toLowerCase()
-                : "";
+            const {
+                firstName,
+                lastName,
+                Email,
+                Telephone,
+                message
+            } = req.body;
 
-        const cleanPhone =
-            Telephone
-                ? Telephone.trim()
-                : "";
+            const fullName =
+                `${firstName || ""} ${lastName || ""}`.trim();
 
-        const newContact = new Contact({
-            name: fullName,
-            email: cleanEmail,
-            phone: cleanPhone,
-            subject: "Contact Form Message",
-            message: message
-        });
+            const cleanEmail =
+                Email
+                    ? Email.trim().toLowerCase()
+                    : "";
 
-        await newContact.save();
+            const cleanPhone =
+                Telephone
+                    ? Telephone.trim()
+                    : "";
 
-        console.log("✅ Contact saved to MongoDB");
+            const newContact =
+                new Contact({
 
-        // =====================================================
-        // EMAIL COMPANY
-        // =====================================================
+                    name:
+                        fullName,
 
-        console.log("📧 Sending company email to:", process.env.COMPANY_EMAIL);
+                    email:
+                        cleanEmail,
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to:  process.env.COMPANY_EMAIL,
-            subject: `New Contact Message from ${fullName}`,
-            html: `
-                <h2>New Contact Message</h2>
+                    phone:
+                        cleanPhone,
 
-                <p>
-                    <strong>First Name:</strong>
-                    ${firstName || "Not provided"}
-                </p>
+                    subject:
+                        "Contact Form Message",
 
-                <p>
-                    <strong>Last Name:</strong>
-                    ${lastName || "Not provided"}
-                </p>
+                    message:
+                        message
 
-                <p>
-                    <strong>Email:</strong>
-                    ${cleanEmail || "Not provided"}
-                </p>
+                });
 
-                <p>
-                    <strong>Telephone:</strong>
-                    ${cleanPhone || "Not provided"}
-                </p>
+            await newContact.save();
 
-                <p>
-                    <strong>Message:</strong>
-                    ${message || "No message"}
-                </p>
-            `
-        });
+            console.log(
+                "✅ Contact saved to MongoDB"
+            );
 
-        console.log("✅ Company email sent");
+            // =====================================================
+            // EMAIL COMPANY
+            // =====================================================
 
-        // =====================================================
-        // EMAIL CUSTOMER
-        // =====================================================
+            console.log(
+                "📧 Sending company email to:",
+                process.env.COMPANY_EMAIL
+            );
 
-        console.log("📧 Sending customer confirmation to:", cleanEmail);
+            await transporter.sendMail({
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: cleanEmail,
-            subject: "We Received Your Message - InterGuide Air Services",
+                from:
+                    process.env.EMAIL_USER,
 
-            html: `
-                <div style="
-                    font-family: Arial, sans-serif;
-                    line-height: 1.6;
-                ">
+                to:
+                    process.env.COMPANY_EMAIL,
 
-                    <img
-                        src="cid:interguide-contact-logo"
-                        alt="InterGuide Air Services"
-                        style="width: 180px;"
-                    />
+                subject:
+                    `New Contact Message from ${fullName}`,
+
+                html: `
 
                     <h2>
-                        Thank You for Contacting
-                        InterGuide Air Services
+                        New Contact Message
                     </h2>
 
                     <p>
-                        Dear ${firstName || "Customer"},
+                        <strong>
+                            First Name:
+                        </strong>
+                        ${firstName || "Not provided"}
                     </p>
 
                     <p>
-                        We have received your message
-                        and our team will get back to
-                        you as soon as possible.
+                        <strong>
+                            Last Name:
+                        </strong>
+                        ${lastName || "Not provided"}
                     </p>
 
                     <p>
-                        Thank you for choosing
-                        <strong>InterGuide Air Services</strong>.
+                        <strong>
+                            Email:
+                        </strong>
+                        ${cleanEmail || "Not provided"}
                     </p>
 
                     <p>
-                        Best regards,<br />
-                        <strong>InterGuide Air Services</strong>
+                        <strong>
+                            Telephone:
+                        </strong>
+                        ${cleanPhone || "Not provided"}
                     </p>
 
-                </div>
-            `,
+                    <p>
+                        <strong>
+                            Message:
+                        </strong>
+                        ${message || "No message"}
+                    </p>
 
-            attachments: [
-                {
-                    filename: "InterGuide.png",
+                `
 
-                    path: path.join(
-                        __dirname,
-                        "assets",
-                        "InterGuide.png"
-                    ),
+            });
 
-                    cid: "interguide-contact-logo"
-                }
-            ]
-        });
+            console.log(
+                "✅ Company email sent"
+            );
 
-        console.log("✅ Customer confirmation email sent");
+            // =====================================================
+            // EMAIL CUSTOMER
+            // =====================================================
 
-        res.status(201).json({
-            message: "Message sent successfully"
-        });
+            console.log(
+                "📧 Sending customer confirmation to:",
+                cleanEmail
+            );
 
-    } catch (error) {
-        console.error("❌ Contact error:", error);
+            await transporter.sendMail({
 
-        res.status(500).json({
-            message: "Error sending message",
-            error: error.message
-        });
+                from:
+                    process.env.EMAIL_USER,
+
+                to:
+                    cleanEmail,
+
+                subject:
+                    "We Received Your Message - InterGuide Air Services",
+
+                html: `
+
+                    <div style="
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                    ">
+
+                        <img
+                            src="cid:interguide-contact-logo"
+                            alt="InterGuide Air Services"
+                            style="width: 180px;"
+                        />
+
+                        <h2>
+                            Thank You for Contacting
+                            InterGuide Air Services
+                        </h2>
+
+                        <p>
+                            Dear ${firstName || "Customer"},
+                        </p>
+
+                        <p>
+                            We have received your message
+                            and our team will get back to
+                            you as soon as possible.
+                        </p>
+
+                        <p>
+                            Thank you for choosing
+                            <strong>
+                                InterGuide Air Services
+                            </strong>.
+                        </p>
+
+                        <p>
+                            Best regards,<br />
+                            <strong>
+                                InterGuide Air Services
+                            </strong>
+                        </p>
+
+                    </div>
+
+                `,
+
+                attachments: [
+
+                    {
+
+                        filename:
+                            "InterGuide.png",
+
+                        path:
+                            path.join(
+                                __dirname,
+                                "assets",
+                                "InterGuide.png"
+                            ),
+
+                        cid:
+                            "interguide-contact-logo"
+
+                    }
+
+                ]
+
+            });
+
+            console.log(
+                "✅ Customer confirmation email sent"
+            );
+
+            res.status(201).json({
+
+                message:
+                    "Message sent successfully"
+
+            });
+
+        } catch (error) {
+
+            console.error(
+                "❌ Contact error:",
+                error
+            );
+
+            res.status(500).json({
+
+                message:
+                    "Error sending message",
+
+                error:
+                    error.message
+
+            });
+
+        }
+
     }
-});
+);
+
 // =====================================================
 // VISA REQUEST
 // =====================================================
@@ -1800,6 +1805,7 @@ app.post(
                     </p>
 
                 `
+
             });
 
             // =====================================================
@@ -1890,6 +1896,7 @@ app.post(
                 attachments: [
 
                     {
+
                         filename:
                             "InterGuide.png",
 
@@ -1902,9 +1909,11 @@ app.post(
 
                         cid:
                             "interguide-visa-logo"
+
                     }
 
                 ]
+
             });
 
             res.status(201).json({
@@ -1930,7 +1939,9 @@ app.post(
                     error.message
 
             });
+
         }
+
     }
 );
 
@@ -1949,8 +1960,10 @@ app.get(
             const hotels =
                 await Hotel.find()
                     .sort({
+
                         createdAt:
                             -1
+
                     });
 
             res.json(hotels);
@@ -1964,8 +1977,11 @@ app.get(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -1996,7 +2012,9 @@ app.post(
 
                     message:
                         "Name, location and price are required"
+
                 });
+
             }
 
             const hotel =
@@ -2014,6 +2032,7 @@ app.post(
                         req.file
                             ? `/uploads/${req.file.filename}`
                             : ""
+
                 });
 
             await hotel.save();
@@ -2036,8 +2055,11 @@ app.post(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2059,6 +2081,7 @@ app.put(
 
                 updateData.image =
                     `/uploads/${req.file.filename}`;
+
             }
 
             const updatedHotel =
@@ -2069,9 +2092,15 @@ app.put(
                     updateData,
 
                     {
-                        new: true,
-                        runValidators: true
+
+                        new:
+                            true,
+
+                        runValidators:
+                            true
+
                     }
+
                 );
 
             if (!updatedHotel) {
@@ -2080,7 +2109,9 @@ app.put(
 
                     message:
                         "Hotel not found"
+
                 });
+
             }
 
             res.json(
@@ -2101,8 +2132,11 @@ app.put(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2126,13 +2160,16 @@ app.delete(
 
                     message:
                         "Hotel not found"
+
                 });
+
             }
 
             res.json({
 
                 message:
                     "Hotel deleted successfully"
+
             });
 
         } catch (error) {
@@ -2144,8 +2181,11 @@ app.delete(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2164,8 +2204,10 @@ app.get(
             const flights =
                 await Flight.find()
                     .sort({
+
                         createdAt:
                             -1
+
                     });
 
             res.json(flights);
@@ -2179,8 +2221,11 @@ app.get(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2216,7 +2261,9 @@ app.post(
 
                     message:
                         "All flight fields are required"
+
                 });
+
             }
 
             const flight =
@@ -2238,6 +2285,7 @@ app.post(
                         req.file
                             ? `/uploads/${req.file.filename}`
                             : ""
+
                 });
 
             await flight.save();
@@ -2260,8 +2308,11 @@ app.post(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2283,6 +2334,7 @@ app.put(
 
                 updateData.image =
                     `/uploads/${req.file.filename}`;
+
             }
 
             const updatedFlight =
@@ -2293,9 +2345,15 @@ app.put(
                     updateData,
 
                     {
-                        new: true,
-                        runValidators: true
+
+                        new:
+                            true,
+
+                        runValidators:
+                            true
+
                     }
+
                 );
 
             if (!updatedFlight) {
@@ -2304,7 +2362,9 @@ app.put(
 
                     message:
                         "Flight not found"
+
                 });
+
             }
 
             res.json(
@@ -2325,8 +2385,11 @@ app.put(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2350,13 +2413,16 @@ app.delete(
 
                     message:
                         "Flight not found"
+
                 });
+
             }
 
             res.json({
 
                 message:
                     "Flight deleted successfully"
+
             });
 
         } catch (error) {
@@ -2368,8 +2434,11 @@ app.delete(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2388,8 +2457,10 @@ app.get(
             const flights =
                 await HomeFlight.find()
                     .sort({
+
                         createdAt:
                             -1
+
                     });
 
             res.json(flights);
@@ -2408,8 +2479,11 @@ app.get(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2443,7 +2517,9 @@ app.post(
 
                     message:
                         "Title, description, label, price and button text are required"
+
                 });
+
             }
 
             const homeFlight =
@@ -2463,6 +2539,7 @@ app.post(
                         req.file
                             ? `/uploads/${req.file.filename}`
                             : ""
+
                 });
 
             await homeFlight.save();
@@ -2485,8 +2562,11 @@ app.post(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2516,12 +2596,14 @@ app.put(
 
                 buttonText:
                     req.body.buttonText
+
             };
 
             if (req.file) {
 
                 updateData.image =
                     `/uploads/${req.file.filename}`;
+
             }
 
             const updatedFlight =
@@ -2532,9 +2614,15 @@ app.put(
                     updateData,
 
                     {
-                        new: true,
-                        runValidators: true
+
+                        new:
+                            true,
+
+                        runValidators:
+                            true
+
                     }
+
                 );
 
             if (!updatedFlight) {
@@ -2543,7 +2631,9 @@ app.put(
 
                     message:
                         "Home flight not found"
+
                 });
+
             }
 
             res.json(
@@ -2564,8 +2654,11 @@ app.put(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2589,13 +2682,16 @@ app.delete(
 
                     message:
                         "Home flight not found"
+
                 });
+
             }
 
             res.json({
 
                 message:
                     "Home flight deleted successfully"
+
             });
 
         } catch (error) {
@@ -2612,8 +2708,11 @@ app.delete(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2632,8 +2731,10 @@ app.get(
             const tours =
                 await HomeTour.find()
                     .sort({
+
                         createdAt:
                             -1
+
                     });
 
             res.json(tours);
@@ -2652,8 +2753,11 @@ app.get(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2687,7 +2791,9 @@ app.post(
 
                     message:
                         "Title, description, price, label and button text are required"
+
                 });
+
             }
 
             const homeTour =
@@ -2707,6 +2813,7 @@ app.post(
                         req.file
                             ? `/uploads/${req.file.filename}`
                             : ""
+
                 });
 
             await homeTour.save();
@@ -2729,8 +2836,11 @@ app.post(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2760,12 +2870,14 @@ app.put(
 
                 buttonText:
                     req.body.buttonText
+
             };
 
             if (req.file) {
 
                 updateData.image =
                     `/uploads/${req.file.filename}`;
+
             }
 
             const updatedTour =
@@ -2776,9 +2888,15 @@ app.put(
                     updateData,
 
                     {
-                        new: true,
-                        runValidators: true
+
+                        new:
+                            true,
+
+                        runValidators:
+                            true
+
                     }
+
                 );
 
             if (!updatedTour) {
@@ -2787,7 +2905,9 @@ app.put(
 
                     message:
                         "Home tour not found"
+
                 });
+
             }
 
             res.json(
@@ -2808,8 +2928,11 @@ app.put(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2833,13 +2956,16 @@ app.delete(
 
                     message:
                         "Home tour not found"
+
                 });
+
             }
 
             res.json({
 
                 message:
                     "Home tour deleted successfully"
+
             });
 
         } catch (error) {
@@ -2856,8 +2982,11 @@ app.delete(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2876,8 +3005,10 @@ app.get(
             const tourPackages =
                 await TourPackage.find()
                     .sort({
+
                         createdAt:
                             1
+
                     });
 
             res.json(
@@ -2898,8 +3029,11 @@ app.get(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -2909,14 +3043,23 @@ app.post(
     "/tour-packages",
     authenticateAdmin,
     upload.fields([
+
         {
-            name: "image1",
-            maxCount: 1
+            name:
+                "image1",
+
+            maxCount:
+                1
         },
+
         {
-            name: "image2",
-            maxCount: 1
+            name:
+                "image2",
+
+            maxCount:
+                1
         }
+
     ]),
     async (req, res) => {
 
@@ -2932,7 +3075,9 @@ app.post(
 
                     message:
                         "Tour package name is required"
+
                 });
+
             }
 
             if (
@@ -2945,13 +3090,17 @@ app.post(
 
                     message:
                         "Both images are required"
+
                 });
+
             }
 
             const existingPackage =
                 await TourPackage.findOne({
+
                     name:
                         name.trim()
+
                 });
 
             if (existingPackage) {
@@ -2960,7 +3109,9 @@ app.post(
 
                     message:
                         "This tour package already exists"
+
                 });
+
             }
 
             const tourPackage =
@@ -2974,6 +3125,7 @@ app.post(
 
                     image2:
                         `/uploads/${req.files.image2[0].filename}`
+
                 });
 
             await tourPackage.save();
@@ -2996,8 +3148,11 @@ app.post(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -3007,14 +3162,23 @@ app.put(
     "/tour-packages/:id",
     authenticateAdmin,
     upload.fields([
+
         {
-            name: "image1",
-            maxCount: 1
+            name:
+                "image1",
+
+            maxCount:
+                1
         },
+
         {
-            name: "image2",
-            maxCount: 1
+            name:
+                "image2",
+
+            maxCount:
+                1
         }
+
     ]),
     async (req, res) => {
 
@@ -3031,6 +3195,7 @@ app.put(
 
                     updateData.image1 =
                         `/uploads/${req.files.image1[0].filename}`;
+
                 }
 
                 if (
@@ -3040,7 +3205,9 @@ app.put(
 
                     updateData.image2 =
                         `/uploads/${req.files.image2[0].filename}`;
+
                 }
+
             }
 
             const updatedTourPackage =
@@ -3051,9 +3218,15 @@ app.put(
                     updateData,
 
                     {
-                        new: true,
-                        runValidators: true
+
+                        new:
+                            true,
+
+                        runValidators:
+                            true
+
                     }
+
                 );
 
             if (!updatedTourPackage) {
@@ -3062,7 +3235,9 @@ app.put(
 
                     message:
                         "Tour package not found"
+
                 });
+
             }
 
             res.json(
@@ -3083,8 +3258,11 @@ app.put(
 
                 error:
                     error.message
+
             });
+
         }
+
     }
 );
 
@@ -3100,6 +3278,7 @@ app.get(
 
             message:
                 "InterGuide Air backend is running"
+
         });
 
     }
