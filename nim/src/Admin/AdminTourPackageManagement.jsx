@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import API_URL from "../api";
 import {
     FaImage,
     FaSave,
@@ -119,7 +119,7 @@ const getImageUrl = (image) => {
 
     // Uploaded image from backend
     if (image.startsWith("/")) {
-        return `http://localhost:5000${image}`;
+        return `${API_URL}${image}`;
     }
 
     // Already a complete URL
@@ -214,7 +214,7 @@ const AdminTourPackageManagement = () => {
 
             const response =
                 await fetch(
-                    "http://localhost:5000/tour-packages"
+                    `${API_URL}/tour-packages`
                 );
 
             if (!response.ok) {
@@ -544,7 +544,7 @@ const AdminTourPackageManagement = () => {
                 response =
                     await fetch(
 
-                        `http://localhost:5000/tour-packages/${packageData.databaseId}`,
+                        `${API_URL}/tour-packages/${packageData.databaseId}`,
 
                         {
                             method:
@@ -566,7 +566,7 @@ const AdminTourPackageManagement = () => {
                 response =
                     await fetch(
 
-                        "http://localhost:5000/tour-packages",
+                        `${API_URL}/tour-packages`,
 
                         {
                             method:

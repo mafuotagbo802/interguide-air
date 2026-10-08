@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import API_URL from "../api";
 import { Link } from "react-router-dom";
 import Admin1 from "../assets/Admin1.jpg";
 
@@ -23,7 +24,7 @@ const ForgotPassword = () => {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/admin/forgot-password",
+        `${API_URL}/admin/forgot-password`,
         {
           method: "POST",
 

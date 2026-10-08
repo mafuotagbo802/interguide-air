@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import API_URL from "../api";
 import {
   FaPlus,
   FaEdit,
@@ -45,7 +46,7 @@ const AdminFlightManagement = () => {
   const fetchFlights = async () => {
     try {
       const response = await fetch(
-        'http://localhost:5000/flights'
+        `${API_URL}/flights`
       );
 
       const data = await response.json();
@@ -226,7 +227,7 @@ const AdminFlightManagement = () => {
 
       if (editingFlightId !== null) {
         const response = await fetch(
-          `http://localhost:5000/flights/${editingFlightId}`,
+          `${API_URL}/flights/${editingFlightId}`,
           {
             method: 'PUT',
 
@@ -276,7 +277,7 @@ const AdminFlightManagement = () => {
 
       else {
         const response = await fetch(
-          'http://localhost:5000/flights',
+          `${API_URL}/flights`,
           {
             method: 'POST',
 
@@ -361,7 +362,7 @@ const AdminFlightManagement = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/flights/${id}`,
+        `${API_URL}/flights/${id}`,
         {
           method: 'DELETE',
 
@@ -527,7 +528,7 @@ const AdminFlightManagement = () => {
                     {flight.image ? (
 
                       <img
-                        src={`http://localhost:5000${flight.image}`}
+                        src={`${API_URL}${flight.image}`}
                         alt={flight.airline}
                         className="w-full h-full object-cover"
                         onError={(e) => {

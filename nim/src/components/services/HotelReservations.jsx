@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-
+import API_URL from "../../api";
 import Hotel1 from "../../assets/Hotel1.jpg";
 import Hotel2 from "../../assets/Hotel2.jpg";
 import Hotel3 from "../../assets/Hotel3.jpg";
@@ -24,9 +24,8 @@ const HotelReservations = () => {
     const fetchHotels = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/hotels"
+          `${API_URL}/hotels`
         );
-
         if (!response.ok) {
           throw new Error("Failed to fetch hotels");
         }
@@ -334,7 +333,7 @@ const HotelReservations = () => {
                     {hotel.image ? (
 
                       <img
-                        src={`http://localhost:5000${hotel.image}`}
+                        src={`${API_URL}${hotel.image}`}
                         alt={hotel.name}
                         className="w-full h-full object-cover"
                       />

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import API_URL from "../api";
 import {
   FaPlus,
   FaEdit,
@@ -82,7 +83,7 @@ const HomeManagement = () => {
   const fetchHomeFlights = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/home-flights"
+        `${API_URL}/home-flights`
       );
 
       const data = await response.json();
@@ -110,7 +111,7 @@ const HomeManagement = () => {
   const fetchHomeTours = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/home-tours"
+        `${API_URL}/home-tours`
       );
 
       const data = await response.json();
@@ -289,7 +290,7 @@ const HomeManagement = () => {
 
       if (editingFlightId !== null) {
         response = await fetch(
-          `http://localhost:5000/home-flights/${editingFlightId}`,
+          `${API_URL}/home-flights/${editingFlightId}`,
           {
             method: "PUT",
             headers: {
@@ -300,7 +301,7 @@ const HomeManagement = () => {
         );
       } else {
         response = await fetch(
-          "http://localhost:5000/home-flights",
+          `${API_URL}/home-flights`,
           {
             method: "POST",
             headers: {
@@ -370,7 +371,7 @@ const HomeManagement = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/home-flights/${id}`,
+        `${API_URL}/home-flights/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -508,7 +509,7 @@ const HomeManagement = () => {
 
       if (editingTourId !== null) {
         response = await fetch(
-          `http://localhost:5000/home-tours/${editingTourId}`,
+          `${API_URL}/home-tours/${editingTourId}`,
           {
             method: "PUT",
             headers: {
@@ -519,7 +520,7 @@ const HomeManagement = () => {
         );
       } else {
         response = await fetch(
-          "http://localhost:5000/home-tours",
+          `${API_URL}/home-tours`,
           {
             method: "POST",
             headers: {
@@ -589,7 +590,7 @@ const HomeManagement = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/home-tours/${id}`,
+        `${API_URL}/home-tours/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -637,10 +638,10 @@ const HomeManagement = () => {
     if (!image) return "";
 
     if (image.startsWith("/")) {
-      return `http://localhost:5000${image}`;
+      return `${API_URL}${image}`;
     }
 
-    return `http://localhost:5000/uploads/${image}`;
+    return `${API_URL}/uploads/${image}`;
   };
 
   // =====================================================

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import API_URL from "../api";
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Admin1 from '../assets/Admin1.jpg';
@@ -83,8 +84,8 @@ const AdminSignup = () => {
 
 
             const response = await fetch(
-                'http://localhost:5000/admin/signup',
-                {
+                `${API_URL}/admin/signup`,
+            {
                     method: 'POST',
 
                     headers: {

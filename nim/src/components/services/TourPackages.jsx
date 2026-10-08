@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-
+import API_URL from "../../api";
 import Tours from "../../assets/Tours.jpg";
 import Family from "../../assets/Family.jpg";
 import Family2 from "../../assets/Family2.jpg";
@@ -53,7 +53,7 @@ const TourPackages = () => {
             try {
 
                 const response = await fetch(
-                    "http://localhost:5000/tour-packages"
+                    `${API_URL}/tour-packages`
                 );
 
                 const data = await response.json();
@@ -89,7 +89,7 @@ const TourPackages = () => {
         }
 
         if (image.startsWith("/")) {
-            return `http://localhost:5000${image}`;
+            return `${API_URL}${image}`;
         }
 
         if (

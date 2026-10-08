@@ -11,6 +11,7 @@ import Sabre from "../../assets/Sabre.png";
 import Parallax2 from "../../assets/Parallax2.png";
 import KICC from "../../assets/KICC.png";
 import { Link } from "react-router-dom";
+import API_URL from "../../api";
 
 const heroSlides = [
     {
@@ -140,10 +141,10 @@ const Home = () => {
                 const [flightResponse, tourResponse] =
                     await Promise.all([
                         fetch(
-                            "http://localhost:5000/home-flights"
+                            `${API_URL}/home-flights`
                         ),
                         fetch(
-                            "http://localhost:5000/home-tours"
+                            `${API_URL}/home-tours`
                         ),
                     ]);
 
@@ -451,7 +452,7 @@ const Home = () => {
                                     {flightDeals[0].image ? (
 
                                         <img
-                                            src={`http://localhost:5000${flightDeals[0].image}`}
+                                            src={`${API_URL}${flightDeals[0].image}`}
                                             alt={flightDeals[0].title}
                                             className="w-full h-full object-cover"
                                         />
@@ -552,7 +553,7 @@ const Home = () => {
                                     {tourPackages[0].image ? (
 
                                         <img
-                                            src={`http://localhost:5000${tourPackages[0].image}`}
+                                            src={`${API_URL}${tourPackages[0].image}`}
                                             alt={tourPackages[0].title}
                                             className="w-full h-full object-cover"
                                         />

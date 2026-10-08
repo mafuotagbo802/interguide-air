@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-
+import API_URL from "../../api";
 import Flight2 from '../../assets/Flight2.jpg';
 import CheapestFares from '../../assets/CheapestFares.jpg';
 import ExclusiveDiscounts from '../../assets/ExclusiveDiscounts.jpg';
@@ -35,7 +35,7 @@ const Flight = () => {
       try {
 
         const response = await fetch(
-          "http://localhost:5000/flights"
+          `${API_URL}/flights`
         );
 
         const data = await response.json();
@@ -335,7 +335,7 @@ const Flight = () => {
                   {flight.image ? (
 
                     <img
-                      src={`http://localhost:5000${flight.image}`}
+                      src={`${API_URL}${flight.image}`}
                       alt={flight.airline}
                       className="w-full h-full object-cover"
                     />

@@ -6,6 +6,7 @@ import {
     FaClock,
 } from 'react-icons/fa';
 import { BsGeoAlt } from "react-icons/bs";
+import API_URL from "../../api";
 
 const Contact = () => {
   const sectionRefs = useRef([]);
@@ -42,7 +43,7 @@ const Contact = () => {
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
 
-        await fetch('http://localhost:5000/contact', {
+        await fetch(`${API_URL}/contact`, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'

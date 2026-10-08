@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Admin1 from '../assets/Admin1.jpg';
+import API_URL from "../api";
 
 const AdminLogin = () => {
 
@@ -53,7 +54,7 @@ const AdminLogin = () => {
 
 
             const response = await fetch(
-                'http://localhost:5000/admin/login',
+                `${API_URL}/admin/login`,
                 {
                     method: 'POST',
 

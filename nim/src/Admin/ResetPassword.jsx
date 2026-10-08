@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import API_URL from "../api";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -58,7 +59,7 @@ const ResetPassword = () => {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/admin/reset-password",
+        `${API_URL}/admin/reset-password`,
         {
           method: "POST",
 

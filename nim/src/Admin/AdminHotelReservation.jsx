@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import API_URL from "../api";
 import {
   FaPlus,
   FaEdit,
@@ -11,7 +12,6 @@ import {
   FaHotel,
 } from 'react-icons/fa';
 
-const API_URL = 'http://localhost:5000/hotels';
 
 const AdminHotelManagement = () => {
   const [hotels, setHotels] = useState([]);
@@ -351,7 +351,7 @@ const AdminHotelManagement = () => {
                 {hotel.image ? (
 
                   <img
-                    src={`http://localhost:5000${hotel.image}`}
+                    src={`${API_URL}${hotel.image}`}
                     alt={hotel.name}
                     className="w-full h-full object-cover"
                   />
@@ -549,7 +549,7 @@ const AdminHotelManagement = () => {
                       <img
                         src={
                           typeof hotelForm.image === 'string'
-                            ? `http://localhost:5000${hotelForm.image}`
+                            ? `${API_URL}${hotelForm.image}`
                             : URL.createObjectURL(
                                 hotelForm.image
                               )

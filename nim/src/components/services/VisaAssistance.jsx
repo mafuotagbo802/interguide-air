@@ -11,6 +11,7 @@ import {
   FaInfoCircle,
   FaGlobe,
 } from "react-icons/fa";
+import API_URL from "../../api";
 
 const Visa = () => {
   const sectionRefs = useRef([]);
@@ -92,7 +93,7 @@ const Visa = () => {
     setMessage("");
 
     try {
-      const response = await fetch("http://localhost:5000/visa-requests", {
+      const response = await fetch(`${API_URL}/visa-requests`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
