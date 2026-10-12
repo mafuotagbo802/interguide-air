@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import API_URL from "../api";
+import API_URL, { HOTELS_API } from "../api";
 import {
   FaPlus,
   FaEdit,
@@ -35,7 +35,7 @@ const AdminHotelManagement = () => {
   // ==============================
   const fetchHotels = async () => {
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch(HOTELS_API);
 
       if (!response.ok) {
         throw new Error('Failed to fetch hotels');
@@ -157,7 +157,7 @@ const AdminHotelManagement = () => {
       // ==============================
       if (editingHotel) {
         response = await fetch(
-          `${API_URL}/${editingHotel._id}`,
+          `${HOTELS_API}/${editingHotel._id}`,
           {
             method: 'PUT',
 
@@ -174,7 +174,7 @@ const AdminHotelManagement = () => {
       // ADD HOTEL
       // ==============================
       else {
-        response = await fetch(API_URL, {
+        response = await fetch(HOTELS_API, {
           method: 'POST',
 
           headers: {
@@ -237,7 +237,7 @@ const AdminHotelManagement = () => {
 
     try {
       const response = await fetch(
-        `${API_URL}/${id}`,
+        `${HOTELS_API}/${id}`,
         {
           method: 'DELETE',
 

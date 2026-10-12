@@ -16,7 +16,7 @@ import API_URL from "../../api";
 const heroSlides = [
     {
         image: Hero5,
-        title: "InterGuide Air Service.",
+        title: "InterGuide Air Services.",
         description: "...........We Plan, You Travel",
         button: "Learn More",
         link: "/AboutUs"
@@ -257,7 +257,7 @@ const Home = () => {
 
                             <img
                                 src={About}
-                                alt="InterGuide Air Ltd Travel"
+                                alt="InterGuide Air Services Travel"
                                 className="w-full h-full object-cover"
                             />
 
@@ -269,7 +269,7 @@ const Home = () => {
                         <div className="px-6 md:px-8">
 
                             <p className="text-blue-600 font-bold text-sm tracking-wider uppercase">
-                                About InterGuide Air Service
+                                About InterGuide Air Services
                             </p>
 
 
@@ -285,7 +285,7 @@ const Home = () => {
                             <p className="text-gray-600 mt-5 leading-relaxed max-w-xl">
 
                                 With over 3 Decades of travel agency operations,
-                                InterGuide Air Ltd has built a reputation for excellence,
+                                InterGuide Air Services has built a reputation for excellence,
                                 reliability and customer satisfaction.
 
                             </p>
@@ -733,7 +733,7 @@ const Home = () => {
 
                                     <p className="text-gray-600 text-sm leading-relaxed mt-2 flex-1">
 
-                                        Working with InterGuide Air Service has been a great
+                                        Working with InterGuide Air Services has been a great
                                         experience. Their professionalism and attention to
                                         detail are outstanding.
 
@@ -804,7 +804,7 @@ const Home = () => {
 
                                     <p className="text-gray-600 text-sm leading-relaxed mt-2 flex-1">
 
-                                        InterGuide Air Service continues to deliver dependable
+                                        InterGuide Air Services continues to deliver dependable
                                         travel solutions with excellent customer service.
 
                                     </p>
