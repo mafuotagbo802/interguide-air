@@ -351,9 +351,10 @@ const AdminHotelManagement = () => {
                 {hotel.image ? (
 
                   <img
-                    src={`${API_URL}${hotel.image}`}
+                    src={hotel.image}
                     alt={hotel.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-44 object-cover"
+                    onError={(e) => console.error("Hotel image failed to load:", hotel.image)}
                   />
 
                 ) : (

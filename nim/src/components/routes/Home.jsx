@@ -452,7 +452,7 @@ const Home = () => {
                                     {flightDeals[0].image ? (
 
                                         <img
-                                            src={`${API_URL}${flightDeals[0].image}`}
+                                            src={flightDeals[0].image}
                                             alt={flightDeals[0].title}
                                             className="w-full h-full object-cover"
                                         />
@@ -553,7 +553,7 @@ const Home = () => {
                                     {tourPackages[0].image ? (
 
                                         <img
-                                            src={`${API_URL}${tourPackages[0].image}`}
+                                            src={tourPackages[0].image}
                                             alt={tourPackages[0].title}
                                             className="w-full h-full object-cover"
                                         />

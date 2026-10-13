@@ -335,7 +335,7 @@ const Flight = () => {
                   {flight.image ? (
 
                     <img
-                      src={`${API_URL}${flight.image}`}
+                      src={flight.image}
                       alt={flight.airline}
                       className="w-full h-full object-cover"
                     />

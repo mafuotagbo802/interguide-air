@@ -633,16 +633,19 @@ const HomeManagement = () => {
   // =====================================================
   // IMAGE URL
   // =====================================================
+const getImageUrl = (image) => {
+  if (!image) return "";
 
-  const getImageUrl = (image) => {
-    if (!image) return "";
+  if (image.startsWith("http://") || image.startsWith("https://")) {
+    return image;
+  }
 
-    if (image.startsWith("/")) {
-      return `${API_URL}${image}`;
-    }
+  if (image.startsWith("/")) {
+    return `${API_URL}${image}`;
+  }
 
-    return `${API_URL}/uploads/${image}`;
-  };
+  return `${API_URL}/uploads/${image}`;
+};
 
   // =====================================================
   // PAGE

@@ -333,7 +333,7 @@ const HotelReservations = () => {
                     {hotel.image ? (
 
                       <img
-                        src={`${API_URL}${hotel.image}`}
+                        src={hotel.image}
                         alt={hotel.name}
                         className="w-full h-full object-cover"
                       />
