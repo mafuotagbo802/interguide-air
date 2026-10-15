@@ -148,15 +148,14 @@ const Contact = () => {
       </div>
       <div
         ref={(el) => (sectionRefs.current[2] = el)}
-        className='reveal px-5 md:px-10 pb-12'>
-        <div className='w-full h-64 md:h-80 rounded-lg overflow-hidden'>
+        className="reveal px-5 md:px-10 pb-12">
+        <div className="w-full h-64 md:h-80 rounded-lg overflow-hidden">
           <iframe
-            title='InterGuide Air Location'
-            src='https://www.google.com/maps?q=6+Toyin+Street,+Ikeja,+Lagos,+Nigeria&output=embed'
-            className='w-full h-full border-0'
-            loading='lazy'
-            allowFullScreen>              
-          </iframe>
+          title="InterGuide Air Location"
+          src="https://maps.google.com/maps?q=InterGuide%20Academy%2C%206%20Toyin%20Street%2C%20Ikeja%2C%20Lagos%2C%20Nigeria&output=embed"
+          className="w-full h-full border-0"
+          loading="lazy"
+          allowFullScreen />
         </div>
       </div>
     </div>
